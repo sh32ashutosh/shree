@@ -1,284 +1,265 @@
-"use client";
-
-import React, { useState } from "react";
+import React from "react";
 import Link from "next/link";
-import { useOrderStore } from "@/stores/order-store";
-import { useHydrated } from "@/lib/use-hydrated";
+import { getAuthenticatedCustomer } from "@/lib/data/customer-data";
 import { formatINR } from "@/lib/currency";
 import {
-  User,
   Package,
   MapPin,
-  ShieldAlert,
+  Heart,
+  RotateCcw,
+  ShieldCheck,
   ArrowRight,
-  Trash2,
-  CheckCircle2,
+  Clock,
+  Sparkles,
 } from "lucide-react";
-import { toast } from "sonner";
 
-export default function AccountPage() {
-  const isHydrated = useHydrated();
-  const { orders, addresses, deleteAddress } = useOrderStore();
-  const [activeTab, setActiveTab] = useState<"orders" | "addresses" | "profile">("orders");
+export default async function AccountOverviewPage() {
+  const user = await getAuthenticatedCustomer();
 
-  if (!isHydrated) {
-    return (
-      <div className="min-h-[50vh] flex items-center justify-center bg-[#FAF6F0]">
-        <div className="text-center space-y-2">
-          <div className="w-8 h-8 border-2 border-[#5E131D] border-t-transparent rounded-full animate-spin mx-auto" />
-          <p className="text-xs text-[#756B62]">Opening Member Sanctum...</p>
-        </div>
-      </div>
-    );
-  }
+  const totalSpentRupees = Math.round((user.customerProfile?.totalSpent || 0) / 100);
+  const recentOrders = user.orders.slice(0, 3);
+  const defaultAddress = user.addresses.find((a) => a.isDefault) || user.addresses[0];
 
   return (
-    <div className="bg-[#FAF6F0] min-h-screen py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-6xl mx-auto space-y-8">
-        {/* Header & Demo Badge */}
-        <div className="bg-white p-6 sm:p-8 rounded-2xl border border-[#E8DED1] shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div className="flex items-center gap-4">
-            <div className="w-16 h-16 rounded-full bg-[#5E131D] text-[#FAF6F0] font-serif text-2xl font-bold flex items-center justify-center shadow-md">
-              AD
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h1 className="font-serif text-2xl font-bold text-[#1F1916]">
-                  Ananya Deshmukh
-                </h1>
-                <span className="text-[10px] bg-[#C5A880]/20 text-[#5E131D] font-bold px-2 py-0.5 rounded-full uppercase">
-                  Royal Member
-                </span>
-              </div>
-              <p className="text-xs text-[#756B62] mt-0.5">
-                ananya.deshmukh@example.com • Member since 2024
-              </p>
-            </div>
+    <div className="space-y-6">
+      {/* Welcome Banner */}
+      <div className="bg-white p-6 sm:p-8 rounded-2xl border border-[#E8DED1] shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div className="flex items-center gap-4">
+          <div className="w-16 h-16 rounded-full bg-[#5E131D] text-[#FAF6F0] font-serif text-2xl font-bold flex items-center justify-center shadow-md">
+            {user.name ? user.name.slice(0, 2).toUpperCase() : "SS"}
           </div>
-
-          <div className="p-3 bg-[#FAF6F0] rounded-lg border border-[#E8DED1] max-w-sm text-xs text-[#756B62] flex items-start gap-2">
-            <ShieldAlert className="w-4 h-4 text-[#5E131D] shrink-0 mt-0.5" />
-            <div>
-              <strong className="text-[#1F1916] block">Demo Account Interface:</strong>
-              <span>
-                Demonstration mode. Authentication and order history are persisted locally in
-                your browser.
+          <div>
+            <div className="flex items-center gap-2">
+              <h1 className="font-serif text-2xl font-bold text-[#1F1916]">
+                Namaste, {user.name || "Patron"}
+              </h1>
+              <span className="text-[10px] bg-[#C5A880]/20 text-[#5E131D] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">
+                Royal Patron
               </span>
             </div>
+            <p className="text-xs text-[#756B62] mt-0.5">
+              {user.email} • Atelier Member since {new Date(user.createdAt).getFullYear()}
+            </p>
           </div>
         </div>
 
-        {/* Navigation Tabs */}
-        <div className="flex border-b border-[#E8DED1] gap-2 overflow-x-auto">
-          <button
-            onClick={() => setActiveTab("orders")}
-            className={`py-3 px-5 text-xs font-semibold uppercase tracking-wider border-b-2 transition-all flex items-center gap-2 shrink-0 ${
-              activeTab === "orders"
-                ? "border-[#5E131D] text-[#5E131D] bg-white rounded-t-lg"
-                : "border-transparent text-[#756B62] hover:text-[#1F1916]"
-            }`}
-          >
-            <Package className="w-4 h-4" />
-            <span>Order History ({orders.length})</span>
-          </button>
+        <div className="flex items-center gap-2 text-xs text-[#756B62] bg-[#FAF6F0] px-4 py-2 rounded-xl border border-[#E8DED1]">
+          <ShieldCheck className="w-4 h-4 text-[#5E131D]" />
+          <span>Silk Mark Certified Buyer Protection Active</span>
+        </div>
+      </div>
 
-          <button
-            onClick={() => setActiveTab("addresses")}
-            className={`py-3 px-5 text-xs font-semibold uppercase tracking-wider border-b-2 transition-all flex items-center gap-2 shrink-0 ${
-              activeTab === "addresses"
-                ? "border-[#5E131D] text-[#5E131D] bg-white rounded-t-lg"
-                : "border-transparent text-[#756B62] hover:text-[#1F1916]"
-            }`}
-          >
-            <MapPin className="w-4 h-4" />
-            <span>Saved Addresses ({addresses.length})</span>
-          </button>
-
-          <button
-            onClick={() => setActiveTab("profile")}
-            className={`py-3 px-5 text-xs font-semibold uppercase tracking-wider border-b-2 transition-all flex items-center gap-2 shrink-0 ${
-              activeTab === "profile"
-                ? "border-[#5E131D] text-[#5E131D] bg-white rounded-t-lg"
-                : "border-transparent text-[#756B62] hover:text-[#1F1916]"
-            }`}
-          >
-            <User className="w-4 h-4" />
-            <span>Profile & Preferences</span>
-          </button>
+      {/* Metrics Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="bg-white p-5 rounded-xl border border-[#E8DED1] shadow-xs space-y-1">
+          <span className="text-xs text-[#756B62] block">Total Orders</span>
+          <div className="font-serif text-2xl font-bold text-[#1F1916]">
+            {user.orders.length}
+          </div>
+          <span className="text-[11px] text-emerald-700 flex items-center gap-1">
+            <Clock className="w-3 h-3" />
+            <span>Lifetime atelier purchases</span>
+          </span>
         </div>
 
-        {/* Tab 1: Orders */}
-        {activeTab === "orders" && (
-          <div className="space-y-4">
-            {orders.length === 0 ? (
-              <div className="p-12 bg-white rounded-xl border border-[#E8DED1] text-center space-y-4">
-                <Package className="w-12 h-12 text-[#C5A880] mx-auto stroke-1" />
-                <h3 className="font-serif text-lg font-bold text-[#1F1916]">
-                  No Past Orders Found
-                </h3>
-                <p className="text-xs text-[#756B62] max-w-sm mx-auto">
-                  When you place simulated orders in our boutique, they will appear here with
-                  tracking information.
-                </p>
-                <Link
-                  href="/collections/sarees"
-                  className="inline-flex items-center gap-1.5 px-6 py-2.5 bg-[#5E131D] text-[#FAF6F0] text-xs font-semibold uppercase tracking-wider rounded-full"
-                >
-                  <span>Explore Handlooms</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
-                </Link>
-              </div>
-            ) : (
-              orders.map((order) => (
+        <div className="bg-white p-5 rounded-xl border border-[#E8DED1] shadow-xs space-y-1">
+          <span className="text-xs text-[#756B62] block">Saved Heirlooms</span>
+          <div className="font-serif text-2xl font-bold text-[#1F1916]">
+            {user.wishlistItems.length}
+          </div>
+          <Link
+            href="/account/wishlist"
+            className="text-[11px] text-[#5E131D] hover:underline flex items-center gap-0.5 font-medium"
+          >
+            <span>View Wishlist</span>
+            <ArrowRight className="w-3 h-3" />
+          </Link>
+        </div>
+
+        <div className="bg-white p-5 rounded-xl border border-[#E8DED1] shadow-xs space-y-1">
+          <span className="text-xs text-[#756B62] block">Saved Addresses</span>
+          <div className="font-serif text-2xl font-bold text-[#1F1916]">
+            {user.addresses.length}
+          </div>
+          <Link
+            href="/account/addresses"
+            className="text-[11px] text-[#5E131D] hover:underline flex items-center gap-0.5 font-medium"
+          >
+            <span>Manage Deliveries</span>
+            <ArrowRight className="w-3 h-3" />
+          </Link>
+        </div>
+
+        <div className="bg-white p-5 rounded-xl border border-[#E8DED1] shadow-xs space-y-1">
+          <span className="text-xs text-[#756B62] block">Trousseau Value</span>
+          <div className="font-serif text-2xl font-bold text-[#5E131D]">
+            {formatINR(totalSpentRupees)}
+          </div>
+          <span className="text-[11px] text-[#756B62]">
+            Gold & Silk Mark Verified
+          </span>
+        </div>
+      </div>
+
+      {/* Recent Orders Section */}
+      <div className="bg-white p-6 rounded-2xl border border-[#E8DED1] shadow-xs space-y-4">
+        <div className="flex items-center justify-between border-b border-[#E8DED1] pb-3">
+          <div className="flex items-center gap-2">
+            <Package className="w-4 h-4 text-[#5E131D]" />
+            <h2 className="font-serif text-base font-bold text-[#1F1916]">
+              Recent Atelier Orders
+            </h2>
+          </div>
+          <Link
+            href="/account/orders"
+            className="text-xs font-semibold text-[#5E131D] hover:underline flex items-center gap-1"
+          >
+            <span>View All ({user.orders.length})</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </Link>
+        </div>
+
+        {recentOrders.length === 0 ? (
+          <div className="text-center py-8 space-y-3">
+            <div className="w-12 h-12 rounded-full bg-[#FAF6F0] text-[#756B62] flex items-center justify-center mx-auto">
+              <Package className="w-6 h-6" />
+            </div>
+            <p className="text-xs text-[#756B62]">
+              You haven&apos;t placed any orders yet. Begin your heirloom collection today.
+            </p>
+            <Link
+              href="/collections/sarees"
+              className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#5E131D] text-[#FAF6F0] text-xs font-semibold uppercase tracking-wider rounded-lg shadow-xs hover:bg-[#4A0E17]"
+            >
+              <Sparkles className="w-3.5 h-3.5" />
+              <span>Explore Pure Silks</span>
+            </Link>
+          </div>
+        ) : (
+          <div className="divide-y divide-[#E8DED1]">
+            {recentOrders.map((order) => {
+              const orderTotal = Math.round(order.totalPaise / 100);
+
+              return (
                 <div
                   key={order.id}
-                  className="bg-white rounded-xl border border-[#E8DED1] p-6 space-y-4 shadow-xs"
+                  className="py-4 first:pt-0 last:pb-0 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
                 >
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-[#E8DED1] pb-3 gap-2">
-                    <div>
-                      <span className="font-mono text-xs font-bold text-[#5E131D]">
-                        Order #{order.id}
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <span className="font-mono text-xs font-bold text-[#1F1916]">
+                        #{order.orderNumber}
                       </span>
-                      <p className="text-[11px] text-[#756B62]">
-                        Placed on {new Date(order.createdAt).toLocaleDateString("en-IN", {
-                          dateStyle: "medium",
-                        })}
-                      </p>
-                    </div>
-
-                    <div className="flex items-center gap-3">
-                      <span className="px-2.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-emerald-100 text-emerald-800">
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full uppercase bg-emerald-100 text-emerald-800">
                         {order.status}
                       </span>
-                      <Link
-                        href={`/order-confirmation/${order.id}`}
-                        className="text-xs font-semibold text-[#5E131D] hover:underline"
-                      >
-                        View Receipt &rarr;
-                      </Link>
                     </div>
+                    <p className="text-xs text-[#756B62]">
+                      Ordered on {new Date(order.createdAt).toLocaleDateString("en-IN", {
+                        day: "numeric",
+                        month: "short",
+                        year: "numeric",
+                      })} • {order.items.length} {order.items.length === 1 ? "creation" : "creations"}
+                    </p>
                   </div>
 
-                  {/* Order items preview */}
-                  <div className="space-y-2">
-                    {order.items.map((item) => (
-                      <div
-                        key={item.product.id}
-                        className="flex justify-between items-center text-xs text-[#1F1916]"
-                      >
-                        <div>
-                          <span className="font-serif font-bold">{item.product.title}</span>
-                          <span className="text-[#756B62] ml-2">
-                            (×{item.quantity} • {item.product.fabric})
-                          </span>
-                        </div>
-                        <span className="font-bold">
-                          {formatINR(item.product.price * item.quantity)}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="pt-3 border-t border-[#E8DED1] flex justify-between items-baseline text-xs">
-                    <span className="text-[#756B62]">
-                      Ship to: {order.shippingAddress.city}, {order.shippingAddress.state}
-                    </span>
-                    <div>
-                      <span className="text-[#756B62] mr-2">Grand Total:</span>
-                      <span className="font-bold text-[#1F1916] text-sm font-serif">
-                        {formatINR(order.grandTotal)}
+                  <div className="flex items-center gap-4">
+                    <div className="text-right">
+                      <span className="font-serif font-bold text-sm text-[#1F1916] block">
+                        {formatINR(orderTotal)}
+                      </span>
+                      <span className="text-[10px] text-[#756B62]">
+                        {order.paymentMethod ? order.paymentMethod.toUpperCase() : "PAID"}
                       </span>
                     </div>
+                    <Link
+                      href={`/account/orders/${order.id}`}
+                      className="px-3.5 py-1.5 border border-[#E8DED1] hover:border-[#5E131D] rounded-lg text-xs font-semibold text-[#1F1916] transition-colors"
+                    >
+                      Inspect
+                    </Link>
                   </div>
                 </div>
-              ))
-            )}
+              );
+            })}
           </div>
         )}
+      </div>
 
-        {/* Tab 2: Addresses */}
-        {activeTab === "addresses" && (
-          <div className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {addresses.map((addr) => (
-                <div
-                  key={addr.id}
-                  className="bg-white p-5 rounded-xl border border-[#E8DED1] space-y-2 shadow-xs relative"
-                >
-                  <div className="flex justify-between items-start">
-                    <div className="flex items-center gap-2">
-                      <span className="font-bold text-sm text-[#1F1916]">{addr.fullName}</span>
-                      {addr.isDefault && (
-                        <span className="text-[10px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded font-bold uppercase">
-                          Default
-                        </span>
-                      )}
-                    </div>
-                    {addresses.length > 1 && (
-                      <button
-                        onClick={() => {
-                          deleteAddress(addr.id);
-                          toast.info("Address deleted");
-                        }}
-                        className="text-[#756B62] hover:text-red-700 p-1"
-                        aria-label="Delete address"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    )}
-                  </div>
-
-                  <div className="text-xs text-[#756B62] space-y-1 pt-1">
-                    <p>{addr.addressLine}</p>
-                    <p>
-                      {addr.city}, {addr.state} — <strong>{addr.pinCode}</strong>
-                    </p>
-                    <p>Phone: {addr.phone}</p>
-                    <p>Email: {addr.email}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Tab 3: Profile */}
-        {activeTab === "profile" && (
-          <div className="bg-white p-6 rounded-xl border border-[#E8DED1] space-y-6 max-w-2xl shadow-xs">
-            <h3 className="font-serif text-lg font-bold text-[#1F1916]">
-              Personal Preferences & Privileges
+      {/* Two Column Grid: Primary Address & Privileges */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Default Shipping Address */}
+        <div className="bg-white p-6 rounded-2xl border border-[#E8DED1] shadow-xs space-y-3">
+          <div className="flex items-center justify-between border-b border-[#E8DED1] pb-2">
+            <h3 className="font-serif text-sm font-bold text-[#1F1916] flex items-center gap-1.5">
+              <MapPin className="w-4 h-4 text-[#5E131D]" />
+              <span>Primary Shipping Address</span>
             </h3>
-
-            <div className="space-y-4 text-xs text-[#756B62]">
-              <div>
-                <label className="block text-[#1F1916] font-semibold mb-1">
-                  Preferred Weave Styles
-                </label>
-                <div className="flex flex-wrap gap-2">
-                  <span className="px-3 py-1 bg-[#FAF6F0] border border-[#C5A880] text-[#5E131D] rounded font-semibold">
-                    Kanjivaram Silk
-                  </span>
-                  <span className="px-3 py-1 bg-[#FAF6F0] border border-[#C5A880] text-[#5E131D] rounded font-semibold">
-                    Banarasi Katan
-                  </span>
-                  <span className="px-3 py-1 bg-[#FAF6F0] border border-[#C5A880] text-[#5E131D] rounded font-semibold">
-                    Pure Organza
-                  </span>
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-[#1F1916] font-semibold mb-1">
-                  Trousseau Newsletter & Private Previews
-                </label>
-                <div className="flex items-center gap-2 text-emerald-800 font-medium">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-700" />
-                  <span>Subscribed to Royal Privilege Previews</span>
-                </div>
-              </div>
-            </div>
+            <Link
+              href="/account/addresses"
+              className="text-xs text-[#5E131D] font-semibold hover:underline"
+            >
+              Manage
+            </Link>
           </div>
-        )}
+
+          {defaultAddress ? (
+            <div className="text-xs text-[#756B62] space-y-1">
+              <p className="font-bold text-[#1F1916]">{defaultAddress.fullName}</p>
+              <p>{defaultAddress.addressLine}</p>
+              <p>
+                {defaultAddress.city}, {defaultAddress.state} —{" "}
+                <strong>{defaultAddress.pinCode}</strong>
+              </p>
+              <p>Phone: {defaultAddress.phone}</p>
+            </div>
+          ) : (
+            <div className="text-xs text-[#756B62] space-y-2">
+              <p>No delivery address saved yet.</p>
+              <Link
+                href="/account/addresses"
+                className="inline-block px-3 py-1.5 bg-[#FAF6F0] border border-[#E8DED1] rounded text-[#5E131D] font-semibold"
+              >
+                + Add Delivery Address
+              </Link>
+            </div>
+          )}
+        </div>
+
+        {/* Exclusive Royal Concierge */}
+        <div className="bg-white p-6 rounded-2xl border border-[#E8DED1] shadow-xs space-y-3">
+          <div className="flex items-center justify-between border-b border-[#E8DED1] pb-2">
+            <h3 className="font-serif text-sm font-bold text-[#1F1916] flex items-center gap-1.5">
+              <Sparkles className="w-4 h-4 text-[#C5A880]" />
+              <span>Dedicated Atelier Concierge</span>
+            </h3>
+            <span className="text-[10px] text-emerald-800 font-bold bg-emerald-50 px-2 py-0.5 rounded">
+              Priority
+            </span>
+          </div>
+
+          <p className="text-xs text-[#756B62] leading-relaxed">
+            Need customized zari border length, silk mark authentication documentation, or bespoke bridal trousseau guidance?
+          </p>
+
+          <div className="pt-2 flex flex-wrap gap-2 text-xs">
+            <a
+              href="https://wa.me/919820012345"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-3 py-1.5 bg-[#FAF6F0] border border-[#E8DED1] hover:border-[#5E131D] text-[#1F1916] font-semibold rounded-lg flex items-center gap-1.5"
+            >
+              <span>WhatsApp Direct (+91 98200 12345)</span>
+            </a>
+            <Link
+              href="/account/returns"
+              className="px-3 py-1.5 bg-[#FAF6F0] border border-[#E8DED1] hover:border-[#5E131D] text-[#5E131D] font-semibold rounded-lg flex items-center gap-1.5"
+            >
+              <RotateCcw className="w-3.5 h-3.5" />
+              <span>Request Return / Exchange</span>
+            </Link>
+          </div>
+        </div>
       </div>
     </div>
   );

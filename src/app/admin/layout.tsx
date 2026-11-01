@@ -3,45 +3,82 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { signOut } from "next-auth/react";
 import {
   LayoutDashboard,
   Shirt,
   ShoppingBag,
-  Tag,
+  Layers,
+  Sparkles,
+  Warehouse,
   Users,
+  Tag,
+  Truck,
+  CreditCard,
+  RotateCcw,
+  Star,
+  HeadphonesIcon,
+  FileText,
   BarChart3,
+  UserCheck,
   Settings,
-  ExternalLink,
+  History,
   Menu,
   X,
+  ExternalLink,
   ShieldCheck,
-  Bell,
-  Sparkles,
+  LogOut,
 } from "lucide-react";
-import { useOrderStore } from "@/stores/order-store";
-import { useAdminStore } from "@/stores/admin-store";
-import { useHydrated } from "@/lib/use-hydrated";
 
-const NAV_ITEMS = [
-  { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
-  { label: "Products Catalog", href: "/admin/products", icon: Shirt },
-  { label: "Orders & Fulfillment", href: "/admin/orders", icon: ShoppingBag },
-  { label: "Coupons & Discounts", href: "/admin/coupons", icon: Tag },
-  { label: "Artisans & Customers", href: "/admin/customers", icon: Users },
-  { label: "Financials & GST", href: "/admin/analytics", icon: BarChart3 },
-  { label: "Store Settings", href: "/admin/settings", icon: Settings },
+const NAV_GROUPS = [
+  {
+    title: "Catalog & Merchandising",
+    items: [
+      { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
+      { label: "Products", href: "/admin/products", icon: Shirt },
+      { label: "Categories", href: "/admin/categories", icon: Layers },
+      { label: "Collections", href: "/admin/collections", icon: Sparkles },
+      { label: "Inventory & Stock", href: "/admin/inventory", icon: Warehouse },
+    ],
+  },
+  {
+    title: "Fulfillment & Orders",
+    items: [
+      { label: "Orders", href: "/admin/orders", icon: ShoppingBag },
+      { label: "Shipments & Logistics", href: "/admin/shipping", icon: Truck },
+      { label: "Returns & Exchanges", href: "/admin/returns", icon: RotateCcw },
+      { label: "Payments & Refunds", href: "/admin/payments", icon: CreditCard },
+      { label: "Privilege Coupons", href: "/admin/coupons", icon: Tag },
+    ],
+  },
+  {
+    title: "Patrons & Engagement",
+    items: [
+      { label: "Customers", href: "/admin/customers", icon: Users },
+      { label: "Product Reviews", href: "/admin/reviews", icon: Star },
+      { label: "Support Tickets", href: "/admin/support", icon: HeadphonesIcon },
+      { label: "Website CMS", href: "/admin/content", icon: FileText },
+    ],
+  },
+  {
+    title: "Intelligence & Security",
+    items: [
+      { label: "Sales & GST Reports", href: "/admin/reports", icon: BarChart3 },
+      { label: "Staff & RBAC", href: "/admin/staff", icon: UserCheck },
+      { label: "Store Settings", href: "/admin/settings", icon: Settings },
+      { label: "Audit Logs", href: "/admin/audit-logs", icon: History },
+    ],
+  },
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const isHydrated = useHydrated();
-  const { orders } = useOrderStore();
-  const { products } = useAdminStore();
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
-  const pendingOrdersCount = isHydrated
-    ? orders.filter((o) => o.status === "Confirmed" || o.status === "Processing").length
-    : 0;
+  // If on admin login page, don't show admin chrome
+  if (pathname === "/admin/login") {
+    return <>{children}</>;
+  }
 
   return (
     <div className="min-h-screen bg-[#F4EFEB] flex flex-col md:flex-row text-[#1F1916]">
@@ -71,9 +108,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       </div>
 
       {/* Desktop Sidebar */}
-      <aside className="hidden md:flex flex-col w-64 bg-[#1F1916] text-[#FAF6F0] shrink-0 border-r border-[#332A24] select-none">
+      <aside className="hidden md:flex flex-col w-64 bg-[#1F1916] text-[#FAF6F0] shrink-0 border-r border-[#332A24] select-none h-screen sticky top-0">
         {/* Brand Area */}
-        <div className="p-6 border-b border-[#332A24] bg-[#171210]">
+        <div className="p-5 border-b border-[#332A24] bg-[#171210]">
           <Link href="/admin" className="block">
             <span className="font-serif text-2xl font-bold tracking-wider text-[#C5A880] block">
               SAUBHAGYA
@@ -81,161 +118,94 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <div className="flex items-center gap-2 mt-0.5">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
               <span className="text-[10px] tracking-widest text-[#E8DFC8] uppercase font-semibold">
-                Admin Control Room
+                Director Console
               </span>
             </div>
           </Link>
         </div>
 
         {/* Navigation List */}
-        <nav className="flex-1 p-4 space-y-1.5 overflow-y-auto">
-          <div className="px-3 py-1 text-[10px] uppercase font-bold text-[#756B62] tracking-wider">
-            Management Sanctum
-          </div>
-          {NAV_ITEMS.map((item) => {
-            const isActive =
-              pathname === item.href ||
-              (item.href !== "/admin" && pathname.startsWith(item.href));
-            const Icon = item.icon;
-
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`flex items-center justify-between px-3.5 py-2.5 rounded-lg text-xs font-semibold tracking-wide transition-all ${
-                  isActive
-                    ? "bg-[#5E131D] text-[#FAF6F0] shadow-sm"
-                    : "text-[#E8DFC8] hover:bg-[#332A24] hover:text-[#FAF6F0]"
-                }`}
-              >
-                <div className="flex items-center gap-3">
-                  <Icon className={`w-4 h-4 ${isActive ? "text-[#C5A880]" : "text-[#756B62]"}`} />
-                  <span>{item.label}</span>
-                </div>
-                {item.label === "Orders & Fulfillment" && pendingOrdersCount > 0 && (
-                  <span className="bg-[#C5A880] text-[#1F1916] text-[10px] font-bold px-2 py-0.2 rounded-full">
-                    {pendingOrdersCount}
-                  </span>
-                )}
-                {item.label === "Products Catalog" && (
-                  <span className="text-[10px] text-[#756B62] font-mono">
-                    {products.length}
-                  </span>
-                )}
-              </Link>
-            );
-          })}
-        </nav>
-
-        {/* Footer Area: Link back to storefront */}
-        <div className="p-4 border-t border-[#332A24] bg-[#171210] space-y-2">
-          <div className="flex items-center gap-2 text-xs text-[#E8DFC8]">
-            <ShieldCheck className="w-4 h-4 text-emerald-400" />
-            <span>Logged in as <strong>Director</strong></span>
-          </div>
-          <Link
-            href="/"
-            className="w-full py-2.5 px-3 bg-[#5E131D]/40 hover:bg-[#5E131D] text-[#FAF6F0] text-xs font-semibold uppercase tracking-wider rounded-lg flex items-center justify-center gap-2 transition-colors border border-[#5E131D]"
-          >
-            <ExternalLink className="w-3.5 h-3.5" />
-            <span>View Live Boutique</span>
-          </Link>
-        </div>
-      </aside>
-
-      {/* Mobile Slide-out Sidebar */}
-      {mobileSidebarOpen && (
-        <div
-          role="dialog"
-          aria-modal="true"
-          className="fixed inset-0 z-50 flex md:hidden"
-        >
-          <div
-            className="fixed inset-0 bg-black/60 backdrop-blur-xs"
-            onClick={() => setMobileSidebarOpen(false)}
-          />
-          <div className="relative w-72 bg-[#1F1916] text-[#FAF6F0] h-full shadow-2xl z-10 flex flex-col p-4">
-            <div className="flex items-center justify-between pb-4 border-b border-[#332A24] mb-4">
-              <div>
-                <span className="font-serif font-bold text-lg text-[#C5A880]">SAUBHAGYA</span>
-                <span className="text-[10px] text-[#E8DFC8] block">ADMIN CONSOLE</span>
+        <nav className="flex-1 p-3 space-y-4 overflow-y-auto">
+          {NAV_GROUPS.map((group) => (
+            <div key={group.title} className="space-y-1">
+              <div className="px-3 py-1 text-[10px] uppercase font-bold text-[#756B62] tracking-wider">
+                {group.title}
               </div>
-              <button
-                onClick={() => setMobileSidebarOpen(false)}
-                className="p-1.5 text-[#E8DFC8] hover:text-white"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <nav className="flex-1 space-y-1 overflow-y-auto">
-              {NAV_ITEMS.map((item) => {
-                const isActive = pathname === item.href;
+              {group.items.map((item) => {
+                const isActive =
+                  pathname === item.href ||
+                  (item.href !== "/admin" && pathname.startsWith(item.href));
                 const Icon = item.icon;
+
                 return (
                   <Link
                     key={item.href}
                     href={item.href}
-                    onClick={() => setMobileSidebarOpen(false)}
-                    className={`flex items-center justify-between px-3 py-2.5 rounded text-xs font-semibold ${
+                    className={`flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-semibold tracking-wide transition-all ${
                       isActive
-                        ? "bg-[#5E131D] text-[#FAF6F0]"
-                        : "text-[#E8DFC8] hover:bg-[#332A24]"
+                        ? "bg-[#5E131D] text-[#FAF6F0] shadow-sm"
+                        : "text-[#E8DFC8] hover:bg-[#332A24] hover:text-[#FAF6F0]"
                     }`}
                   >
-                    <div className="flex items-center gap-2.5">
-                      <Icon className="w-4 h-4 text-[#C5A880]" />
-                      <span>{item.label}</span>
-                    </div>
+                    <Icon className={`w-4 h-4 ${isActive ? "text-[#C5A880]" : "text-[#756B62]"}`} />
+                    <span>{item.label}</span>
                   </Link>
                 );
               })}
-            </nav>
-
-            <div className="pt-4 border-t border-[#332A24]">
-              <Link
-                href="/"
-                onClick={() => setMobileSidebarOpen(false)}
-                className="w-full py-2 bg-[#5E131D] text-[#FAF6F0] text-xs font-semibold uppercase rounded flex items-center justify-center gap-1.5"
-              >
-                <ExternalLink className="w-3.5 h-3.5" />
-                <span>Visit Storefront</span>
-              </Link>
             </div>
+          ))}
+        </nav>
+
+        {/* Footer Area */}
+        <div className="p-4 border-t border-[#332A24] bg-[#171210] space-y-2">
+          <div className="flex items-center justify-between text-xs text-[#E8DFC8]">
+            <div className="flex items-center gap-2">
+              <ShieldCheck className="w-4 h-4 text-emerald-400" />
+              <span>Super Admin</span>
+            </div>
+            <button
+              onClick={() => signOut({ callbackUrl: "/admin/login" })}
+              className="text-red-400 hover:text-red-300 p-1"
+              title="Sign Out"
+            >
+              <LogOut className="w-4 h-4" />
+            </button>
           </div>
+          <Link
+            href="/"
+            target="_blank"
+            className="w-full py-2 px-3 bg-[#5E131D]/40 hover:bg-[#5E131D] text-[#FAF6F0] text-xs font-semibold uppercase tracking-wider rounded-lg flex items-center justify-center gap-2 transition-colors border border-[#5E131D]"
+          >
+            <ExternalLink className="w-3.5 h-3.5" />
+            <span>Storefront View</span>
+          </Link>
         </div>
-      )}
+      </aside>
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0 overflow-y-auto">
-        {/* Top Control Bar */}
         <header className="hidden md:flex h-16 bg-white border-b border-[#E8DED1] px-8 items-center justify-between sticky top-0 z-30 shadow-xs">
           <div className="flex items-center gap-3">
             <span className="text-xs font-bold uppercase tracking-wider text-[#5E131D] bg-[#5E131D]/10 px-2.5 py-1 rounded">
-              Atelier Backoffice
+              Atelier Management
             </span>
             <span className="text-xs text-[#756B62]">
-              Silk Mark & Handloom Operations Platform
+              Silk Mark & Handloom Operations
             </span>
           </div>
 
           <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2 text-xs text-[#756B62]">
-              <Sparkles className="w-3.5 h-3.5 text-[#C5A880]" />
-              <span>Simulated Demo Mode Active</span>
-            </div>
-
             <Link
               href="/"
+              target="_blank"
               className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-[#FAF6F0] border border-[#E8DED1] hover:border-[#5E131D] text-[#1F1916] text-xs font-semibold transition-colors"
             >
-              <span>Live Store</span>
+              <span>Visit Boutique</span>
               <ExternalLink className="w-3.5 h-3.5" />
             </Link>
           </div>
         </header>
 
-        {/* Page Content */}
         <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto">
           {children}
         </main>

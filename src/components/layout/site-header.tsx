@@ -11,6 +11,7 @@ import {
   Menu,
   X,
   ArrowRight,
+  ShieldCheck,
 } from "lucide-react";
 import { useCartStore } from "@/stores/cart-store";
 import { useWishlistStore } from "@/stores/wishlist-store";
@@ -156,6 +157,15 @@ export function SiteHeader() {
                 aria-label="Demo Account"
               >
                 <User className="w-5 h-5" />
+              </Link>
+
+              <Link
+                href="/admin"
+                className="hidden sm:inline-flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider text-[#5E131D] bg-[#5E131D]/10 hover:bg-[#5E131D] hover:text-[#FAF6F0] px-2.5 py-1 rounded transition-colors"
+                title="Admin Control Room"
+              >
+                <ShieldCheck className="w-3.5 h-3.5" />
+                <span>Admin</span>
               </Link>
 
               <button
