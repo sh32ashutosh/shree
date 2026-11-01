@@ -1,0 +1,71 @@
+@import "tailwindcss";
+
+@theme inline {
+  --color-maroon: #5E131D;
+  --color-maroon-hover: #4A0E17;
+  --color-maroon-light: #781A26;
+  --color-gold: #C5A880;
+  --color-gold-hover: #B3946C;
+  --color-gold-light: #E8DFC8;
+  --color-ivory: #FAF6F0;
+  --color-charcoal: #1F1916;
+  --color-cream: #FDFBF7;
+  --color-muted: #756B62;
+  --color-border-custom: #E8DED1;
+
+  --font-serif: var(--font-playfair), "Playfair Display", Georgia, serif;
+  --font-sans: var(--font-jakarta), "Plus Jakarta Sans", system-ui, sans-serif;
+}
+
+:root {
+  --bg-primary: #FAF6F0;
+  --text-primary: #1F1916;
+  --maroon: #5E131D;
+  --gold: #C5A880;
+}
+
+body {
+  background-color: #FAF6F0;
+  color: #1F1916;
+  font-family: var(--font-jakarta), "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
+  overflow-x: hidden;
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #FAF6F0;
+}
+::-webkit-scrollbar-thumb {
+  background: #C5A880;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #B3946C;
+}
+
+/* Luxury Textile Mandala Pattern */
+.bg-mandala-pattern {
+  background-color: #FAF6F0;
+  background-image: radial-gradient(#C5A880 0.75px, transparent 0.75px), radial-gradient(#5E131D 0.75px, #FAF6F0 0.75px);
+  background-size: 30px 30px;
+  background-position: 0 0, 15px 15px;
+  opacity: 0.97;
+}
+
+.bg-gold-shimmer {
+  background: linear-gradient(135deg, #C5A880 0%, #FAF6F0 50%, #B3946C 100%);
+}
+
+/* Smooth transitions */
+* {
+  border-color: #E8DED1;
+}
+
+/* Prevent layout jump for custom drawers */
+body.drawer-open {
+  overflow: hidden;
+}
